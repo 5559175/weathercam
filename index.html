@@ -5,73 +5,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Live Weather Cam</title>
     <style>
+        /* Strip all default margins */
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             background-color: #0f172a;
-            /* Sets your requested top and side spacing rules */
+            
+            /* Apply your requested spacing from the browser edges */
             padding-top: 15px;
             padding-left: 10px;
             padding-right: 10px;
             padding-bottom: 15px;
             
-            /* Centers the element cleanly without any rigid layout grids */
+            /* Center the layout block */
             text-align: center;
-            overflow: auto;
         }
 
         img {
-            display: inline-block;
-            border-radius: 0; /* Square edges */
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-            
-            /* Clean fallback values if JS is disabled */
+            /* 1. SCALED TO FIT ANY WINDOW AUTOMATICALLY: 
+               These two lines ensure the 4K image dynamically shrinks to fit 
+               whatever boundary it hits first—your screen width OR your screen height. */
             max-width: 100%;
-            height: auto;
+            max-height: calc(100vh - 30px); /* 100% height minus top/bottom padding */
+            
+            /* Keep the native 16:9 4K landscape aspect ratio pristine */
+            object-fit: contain; 
+            
+            /* Custom presentation preferences */
+            display: inline-block;
+            border-radius: 0; /* Perfectly sharp, square corners */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
         }
     </style>
 </head>
 <body>
 
-    <img id="weather-cam" alt="Live Weather Snapshot">
-
-    <script>
-        const camImage = document.getElementById('weather-cam');
-
-        // 1. Force the browser to discard cached images on page refresh
-        const uniqueTimestamp = new Date().getTime();
-        camImage.src = 'current.jpg?t=' + uniqueTimestamp;
-
-        // 2. Intelligent Setup (Runs exactly once on load, then self-destructs)
-        camImage.onload = function() {
-            // Get the precise dimensions of your browser window area, accounting for padding
-            const availWidth = window.innerWidth - 20;
-            const availHeight = window.innerHeight - 30;
-
-            // Target aspect ratio of the 4K camera frame (16:9 = 1.777)
-            const targetAspect = 3840 / 2160;
-            const currentAspect = availWidth / availHeight;
-
-            let finalWidth, finalHeight;
-
-            if (currentAspect > targetAspect) {
-                // Your Ultra-wide monitor path: fit the image perfectly to the screen height
-                finalHeight = availHeight;
-                finalWidth = availHeight * targetAspect;
-            } else {
-                // Mobile/Standard monitor path: fit the image perfectly to the screen width
-                finalWidth = availWidth;
-                finalHeight = availWidth / targetAspect;
-            }
-
-            // Lock these calculated sizing dimensions strictly into the image element
-            this.style.width = Math.floor(finalWidth) + 'px';
-            this.style.height = Math.floor(finalHeight) + 'px';
-            
-            // Clean up the event handler so it doesn't re-fire during zooming operations
-            this.onload = null;
-        };
-    </script>
+    <img src="current.jpg" alt="Live Weather Snapshot">
 
 </body>
 </html>
