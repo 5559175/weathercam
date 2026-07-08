@@ -9,34 +9,39 @@
 
         body {
             background-color: #0f172a;
-            /* No flexbox centering! This prevents Chrome from crushing the image layout at 500% zoom */
+            /* Explicit directional padding prevents Chrome from crunching the layout */
             padding-top: 15px;
             padding-left: 10px;
             padding-right: 10px;
-            overflow: auto;
+            padding-bottom: 15px;
+            
+            /* Align things to the top center cleanly */
+            text-align: center;
+        }
+
+        .cam-wrapper {
+            display: inline-block;
+            /* Uses percentage width based on a 16:9 4K widescreen aspect ratio.
+               By avoiding strict vh/vw caps, Chrome can scale this area smoothly up to 500%. */
+            width: 96%;
+            max-width: 1700px; /* Safe bounds for giant desktop screens */
+            margin: 0 auto;
         }
 
         img {
             display: block;
-            /* Centers the block element using standard page margins instead of a flex grid */
-            margin-left: auto;
-            margin-right: auto;
-            
-            /* Initial fit: Scales to fit your screen width on load */
             width: 100%;
             height: auto;
-            
-            /* Limits the width so it doesn't spill over your monitor's height on initial load */
-            max-width: calc((100vh - 30px) * (16 / 9));
-            
-            border-radius: 0;
+            border-radius: 0; /* Square edges */
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
         }
     </style>
 </head>
 <body>
 
-    <img id="weather-cam" alt="Live Weather Snapshot">
+    <div class="cam-wrapper">
+        <img id="weather-cam" alt="Live Weather Snapshot">
+    </div>
 
     <script>
         // Forces Chrome to bypass its cache on every page refresh
