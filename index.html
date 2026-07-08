@@ -5,42 +5,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Live Weather Cam</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
+        /* Force the core browser tags to snap to the exact available window height */
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
             background-color: #0f172a;
-            /* Explicit padding settings keep our top spacing intact */
-            padding-top: 15px;
-            padding-left: 10px;
-            padding-right: 10px;
-            padding-bottom: 15px;
-            
-            /* Center the layout block without using bug-prone flexboxes */
-            text-align: center;
         }
 
-        .cam-wrapper {
+        body {
+            /* Create structural padding without dynamic viewport calculations */
+            padding: 15px 10px 15px 10px;
+            box-sizing: border-box;
+            
+            /* Center the layout container */
+            display: block;
+            text-align: center;
+            overflow: auto; /* Allow natural page panning when zoomed */
+        }
+
+        .cam-container {
             display: inline-block;
             margin: 0 auto;
-
-            /* UNIVERSAL SCALE: Pick whichever value is smaller at 100% zoom:
-               1. 95% of the total screen width (perfect for mobile and regular screens)
-               2. The exact width required to fit your monitor height at 16:9 (perfect for your ultra-wide) */
-            width: min(95vw, calc((100vh - 30px) * (16 / 9)));
+            
+            /* Fit to screen perfectly at 100% load: 
+               Forces the wrapper box to be exactly as high as the browser window, 
+               minus our 30px top/bottom padding constraints. */
+            height: calc(100% - 30px);
+            
+            /* Maintains the exact 16:9 native widescreen camera aspect ratio layout */
+            aspect-ratio: 16 / 9;
         }
 
         img {
             display: block;
+            /* Fills the container box completely with zero layout math */
             width: 100%;
-            height: auto;
-            border-radius: 0; /* Square edges */
+            height: 100%;
+            object-fit: contain;
+            
+            border-radius: 0;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
         }
     </style>
 </head>
 <body>
 
-    <div class="cam-wrapper">
+    <div class="cam-container">
         <img id="weather-cam" alt="Live Weather Snapshot">
     </div>
 
