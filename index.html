@@ -9,31 +9,44 @@
 
         body {
             background-color: #0f172a;
-            /* Explicit directional padding prevents Chrome from crunching the layout */
             padding-top: 15px;
             padding-left: 10px;
             padding-right: 10px;
             padding-bottom: 15px;
             
-            /* Align things to the top center cleanly */
-            text-align: center;
+            /* Tells the browser engine to create a dynamic measurement box */
+            container-type: inline-size;
+            width: 100%;
+            min-height: 100vh;
         }
 
         .cam-wrapper {
-            display: inline-block;
-            /* Uses percentage width based on a 16:9 4K widescreen aspect ratio.
-               By avoiding strict vh/vw caps, Chrome can scale this area smoothly up to 500%. */
-            width: 96%;
-            max-width: 1700px; /* Safe bounds for giant desktop screens */
             margin: 0 auto;
+            text-align: center;
+            
+            /* Standard Initial Fit: Scale dynamically using viewport limits.
+               This guarantees no scrollbars on load, even on ultra-wides. */
+            width: 100%;
+            max-width: calc((100vh - 30px) * (16 / 9));
         }
 
         img {
             display: block;
             width: 100%;
             height: auto;
-            border-radius: 0; /* Square edges */
+            border-radius: 0;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        /* CRUCIAL ZOOM FIX: When Chrome zooms into the page, the screen's relative 
+           internal width drops dramatically. When it drops below 800 virtual pixels 
+           (which happens instantly when zooming toward 500%), we strip away the 
+           restrictive width caps. This allows native browser zooming to take over entirely! */
+        @container (max-width: 800px) {
+            .cam-wrapper {
+                max-width: 100% !important;
+                width: 100% !important;
+            }
         }
     </style>
 </head>
@@ -44,7 +57,7 @@
     </div>
 
     <script>
-        // Forces Chrome to bypass its cache on every page refresh
+        // Bypasses browser cache on every single manual page refresh
         const camImage = document.getElementById('weather-cam');
         const uniqueTimestamp = new Date().getTime();
         camImage.src = 'current.jpg?t=' + uniqueTimestamp;
