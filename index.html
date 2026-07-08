@@ -5,61 +5,72 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Live Weather Cam</title>
     <style>
-        /* Force the core browser tags to snap to the exact available window height */
-        html, body {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            background-color: #0f172a;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            /* Create structural padding without dynamic viewport calculations */
-            padding: 15px 10px 15px 10px;
-            box-sizing: border-box;
+            background-color: #0f172a;
+            /* Sets your requested top and side spacing rules */
+            padding-top: 15px;
+            padding-left: 10px;
+            padding-right: 10px;
+            padding-bottom: 15px;
             
-            /* Center the layout container */
-            display: block;
+            /* Centers the element cleanly without any rigid layout grids */
             text-align: center;
-            overflow: auto; /* Allow natural page panning when zoomed */
-        }
-
-        .cam-container {
-            display: inline-block;
-            margin: 0 auto;
-            
-            /* Fit to screen perfectly at 100% load: 
-               Forces the wrapper box to be exactly as high as the browser window, 
-               minus our 30px top/bottom padding constraints. */
-            height: calc(100% - 30px);
-            
-            /* Maintains the exact 16:9 native widescreen camera aspect ratio layout */
-            aspect-ratio: 16 / 9;
+            overflow: auto;
         }
 
         img {
-            display: block;
-            /* Fills the container box completely with zero layout math */
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            
-            border-radius: 0;
+            display: inline-block;
+            border-radius: 0; /* Square edges */
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            
+            /* Clean fallback values if JS is disabled */
+            max-width: 100%;
+            height: auto;
         }
     </style>
 </head>
 <body>
 
-    <div class="cam-container">
-        <img id="weather-cam" alt="Live Weather Snapshot">
-    </div>
+    <img id="weather-cam" alt="Live Weather Snapshot">
 
     <script>
-        // Forces Chrome to drop the old cached image every time the page refreshes
         const camImage = document.getElementById('weather-cam');
+
+        // 1. Force the browser to discard cached images on page refresh
         const uniqueTimestamp = new Date().getTime();
         camImage.src = 'current.jpg?t=' + uniqueTimestamp;
+
+        // 2. Intelligent Setup (Runs exactly once on load, then self-destructs)
+        camImage.onload = function() {
+            // Get the precise dimensions of your browser window area, accounting for padding
+            const availWidth = window.innerWidth - 20;
+            const availHeight = window.innerHeight - 30;
+
+            // Target aspect ratio of the 4K camera frame (16:9 = 1.777)
+            const targetAspect = 3840 / 2160;
+            const currentAspect = availWidth / availHeight;
+
+            let finalWidth, finalHeight;
+
+            if (currentAspect > targetAspect) {
+                // Your Ultra-wide monitor path: fit the image perfectly to the screen height
+                finalHeight = availHeight;
+                finalWidth = availHeight * targetAspect;
+            } else {
+                // Mobile/Standard monitor path: fit the image perfectly to the screen width
+                finalWidth = availWidth;
+                finalHeight = availWidth / targetAspect;
+            }
+
+            // Lock these calculated sizing dimensions strictly into the image element
+            this.style.width = Math.floor(finalWidth) + 'px';
+            this.style.height = Math.floor(finalHeight) + 'px';
+            
+            // Clean up the event handler so it doesn't re-fire during zooming operations
+            this.onload = null;
+        };
     </script>
 
 </body>
