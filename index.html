@@ -14,47 +14,38 @@
             justify-content: flex-start;
             align-items: center; 
             min-height: 100vh;
+            /* Exactly 15px spacing from the top browser edge */
             padding: 15px 10px 15px 10px;
-            overflow: auto; /* Standard window scrollbars appear naturally when zooming */
+            overflow: auto; /* Scrollbars appear cleanly when you zoom in */
+        }
+
+        /* The Frame Container restricts initial layout heights without locking the actual image element */
+        .cam-frame {
+            width: 100%;
+            /* 16:9 aspect ratio prevents the image from creating vertical scrollbars on load */
+            max-width: calc((100vh - 30px) * (16 / 9)); 
         }
 
         img {
             display: block;
-            /* No max-height boundaries! This allows Ctrl + Wheel zooming to expand the image naturally */
+            width: 100%;
+            height: auto;
+            border-radius: 0; /* Sharp, square edges */
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-            border-radius: 0;
         }
     </style>
 </head>
 <body>
 
-    <img id="weather-cam" alt="Live Weather Snapshot">
+    <div class="cam-frame">
+        <img id="weather-cam" alt="Live Weather Snapshot">
+    </div>
 
     <script>
+        // Forces Chrome to drop the old cached image every time the page refreshes
         const camImage = document.getElementById('weather-cam');
-
-        // 1. Force the browser to discard cached images on page refresh
         const uniqueTimestamp = new Date().getTime();
         camImage.src = 'current.jpg?t=' + uniqueTimestamp;
-
-        // 2. Intelligent Scaling Setup (Runs Once on Page Load)
-        camImage.onload = function() {
-            // Check the available height of the user's browser window, accounting for our 30px padding
-            const availableHeight = window.innerHeight - 30;
-            
-            // Calculate what percentage of the screen height the 4K image needs to scale to to fit perfectly
-            const scalePercentage = (availableHeight / 2160) * 100;
-
-            if (scalePercentage < 100) {
-                // Shrink the image to fit your screen initially using a fluid style percentage
-                this.style.width = (3840 * (scalePercentage / 100)) + 'px';
-                this.style.height = 'auto';
-            } else {
-                // If the monitor is larger than 4K, display it at raw size
-                this.style.width = '3840px';
-                this.style.height = '2160px';
-            }
-        };
     </script>
 
 </body>
