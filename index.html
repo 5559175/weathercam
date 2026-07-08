@@ -10,19 +10,36 @@
             background-color: #0f172a;
             display: flex;
             flex-direction: column;
-            justify-content: flex-start; /* Aligns content to the very top */
+            justify-content: flex-start;
+            align-items: center; /* Centers the image horizontally on wide desktop monitors */
             min-height: 100vh;
-            /* Add a 15px safe space at the top, and 10px on the sides for a clean frame look */
-            padding: 15px 10px 0 10px;
+            /* Account for the 15px top padding in our viewport calculations */
+            padding: 15px 10px 15px 10px;
+            overflow: hidden; /* Guarantees no scrollbars can ever appear on the window */
         }
         img {
-            width: 100%;
-            height: auto; /* Scales down fluidly based on your screen's width */
             display: block;
+            width: auto;
+            height: auto;
+            /* Adaptive constraints: Fit fluidly on phones, cap height on desktops */
+            max-width: 100%;
+            max-height: calc(100vh - 30px); /* Adjusts for top and bottom padding */
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
         }
     </style>
 </head>
 <body>
-    <img src="current.jpg" alt="Live Weather Snapshot">
+
+    <img id="weather-cam" alt="Live Weather Snapshot">
+
+    <script>
+        // Forces the browser to discard cached images on every page refresh
+        const camImage = document.getElementById('weather-cam');
+        const uniqueTimestamp = new Date().getTime();
+        camImage.src = 'current.jpg?t=' + uniqueTimestamp;
+    </script>
+
 </body>
 </html>
