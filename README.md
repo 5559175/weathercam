@@ -4,7 +4,7 @@ Gemini-coded script and index.html which:
 
 - Captures a still 4K image from a Reolink CX810 IP security camera
 - Displays the temperature, humidity and wind speed data collected by an Ecowitt WS69 array and WS2910 station (configured via a "custom" upload with server listening on TCP/8123).
-- Pushes to GitHub (to serve via Pages to permit easy sharing elsewhere).
+- Auto-pushes to GitHub (to serve via Pages to permit easy sharing elsewhere).
 
 Requires netcat, curl and git.
 
