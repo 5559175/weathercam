@@ -14,9 +14,16 @@ DISPLAY_EMAIL="weathercam@local.lan"
 # 1. Pull the crisp image straight into your folder
 curl -s -o "$REPO_DIR/current.jpg" "$CAM_URL"
 
-# 2. Grab the live raw broadcast from the WS2910 on port 8123
-# Increased to 75 seconds to ensure we catch the station's 60-second broadcast loop
-RAW_DATA=$(timeout 75 /usr/bin/nc -l -p 8123 -q 1 2>/dev/null)
+# 2. Grab the rapid broadcast from the WS2910 on port 8123 using a bidirectional pipe
+# Create a temporary pipe file for the network handshake
+rm -f /tmp/wpipe
+mkfifo /tmp/wpipe
+
+# Listen on port 8123, catch the data, and send the HTTP response back down the pipe
+RAW_DATA=$(cat /tmp/wpipe | timeout 35 /usr/bin/nc -l -p 8123 2>/dev/null & echo "HTTP/1.1 200 OK\r\nContent-Length: 0\r\nConnection: close\r\n\r\n" > /tmp/wpipe)
+
+# Clean up the pipe file immediately
+rm -f /tmp/wpipe
 
 # Filter out the raw metrics
 TEMPF=$(echo "$RAW_DATA" | grep -o 'tempf=[0-9.]*' | cut -d'=' -f2)
