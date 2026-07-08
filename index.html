@@ -5,54 +5,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Live Weather Cam</title>
     <style>
-        /* Base styles */
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             background-color: #0f172a;
             display: flex;
             flex-direction: column;
-            justify-content: flex-start; /* Start image at the top */
-            align-items: center; /* Center horizontally by default */
+            justify-content: flex-start;
+            align-items: center;
             min-height: 100vh;
-            padding: 15px 10px 15px 10px; /* The requested top spacing */
-            
-            /* IMPORTANT: We re-enable standard window scrollbars for desktop panning */
-            overflow: auto;
+            padding: 15px 10px 15px 10px;
+            /* Allow standard browser scrollbars when image overflows screen boundaries */
+            overflow: auto; 
         }
 
         img {
             display: block;
             width: auto;
             height: auto;
+            border-radius: 0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
             
-            /* Responsive constraints that adapt dynamically */
-            max-width: 100%; /* Fits width perfectly on mobile/tablets */
-            
-            /* *** Desktop/Widescreen Adjustment ***
-               On large screens where 100% width forces excessive scaling,
-               we cap the *initial* height to fit the viewport vertically
-               to prevent scrollbars *on load*. */
+            /* Initial clean fit-to-screen settings */
+            max-width: 100%;
             max-height: calc(100vh - 30px);
             object-fit: contain;
-
-            /* *** Rounded Edges Removed *** */
-            border-radius: 0;
             
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            /* Show a magnifying glass pointer to indicate it can be clicked */
+            cursor: zoom-in;
+            transition: max-width 0.1s ease, max-height 0.1s ease;
         }
 
-        /* *** NEW: Desktop Full-Size Zoom Enhancement ***
-           When the image is clicked (active), we override all standard
-           constraints, forcing it to render at raw 4K dimensions with scrollbars. */
-        img:active {
+        /* This special class is activated via JavaScript on click */
+        img.full-size {
             max-width: none !important;
             max-height: none !important;
-            object-fit: initial !important;
-            padding: 0 !important;
-            width: 3840px !important; /* Force native 4K width */
-            height: 2160px !important; /* Force native 4K height */
-            cursor: move; /* Changes cursor to a 'pan' hand icon */
+            width: 3840px !important;  /* Force the raw, literal 4K asset scale */
+            height: 2160px !important;
+            cursor: zoom-out; /* Changes cursor to a zoom-out glass */
         }
     </style>
 </head>
@@ -61,10 +51,17 @@
     <img id="weather-cam" alt="Live Weather Snapshot">
 
     <script>
-        // Forces the browser to discard cached images on every page refresh
         const camImage = document.getElementById('weather-cam');
+        
+        // 1. Force the browser to discard cached images on page refresh
         const uniqueTimestamp = new Date().getTime();
         camImage.src = 'current.jpg?t=' + uniqueTimestamp;
+
+        // 2. Desktop Click-to-Zoom Handler
+        camImage.addEventListener('click', function() {
+            // Toggles the .full-size class on and off with each normal mouse click
+            this.classList.toggle('full-size');
+        });
     </script>
 
 </body>
