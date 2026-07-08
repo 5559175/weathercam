@@ -5,42 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Live Weather Cam</title>
     <style>
-        /* Strip all default margins */
         * { margin: 0; padding: 0; box-sizing: border-box; }
-
         body {
             background-color: #0f172a;
-            
-            /* Apply your requested spacing from the browser edges */
-            padding-top: 15px;
-            padding-left: 10px;
-            padding-right: 10px;
-            padding-bottom: 15px;
-            
-            /* Center the layout block */
+            padding: 15px 10px;
             text-align: center;
+            font-family: sans-serif;
         }
-
         img {
-            /* 1. SCALED TO FIT ANY WINDOW AUTOMATICALLY: 
-               These two lines ensure the 4K image dynamically shrinks to fit 
-               whatever boundary it hits first—your screen width OR your screen height. */
             max-width: 100%;
-            max-height: calc(100vh - 30px); /* 100% height minus top/bottom padding */
-            
-            /* Keep the native 16:9 4K landscape aspect ratio pristine */
-            object-fit: contain; 
-            
-            /* Custom presentation preferences */
-            display: inline-block;
-            border-radius: 0; /* Perfectly sharp, square corners */
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            max-height: calc(100vh - 80px);
+            object-fit: contain;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+        }
+        .banner {
+            margin-top: 15px;
+            color: #cbd5e1;
+            font-size: 1.2rem;
         }
     </style>
 </head>
 <body>
-
     <img src="current.jpg" alt="Live Weather Snapshot">
-
+    <div class="banner">Weather Data Syncing...</div>
 </body>
 </html>
