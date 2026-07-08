@@ -12,37 +12,17 @@
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
-            align-items: center;
+            align-items: center; 
             min-height: 100vh;
             padding: 15px 10px 15px 10px;
-            /* Allow standard browser scrollbars when image overflows screen boundaries */
-            overflow: auto; 
+            overflow: auto; /* Standard window scrollbars appear naturally when zooming */
         }
 
         img {
             display: block;
-            width: auto;
-            height: auto;
-            border-radius: 0;
+            /* No max-height boundaries! This allows Ctrl + Wheel zooming to expand the image naturally */
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-            
-            /* Initial clean fit-to-screen settings */
-            max-width: 100%;
-            max-height: calc(100vh - 30px);
-            object-fit: contain;
-            
-            /* Show a magnifying glass pointer to indicate it can be clicked */
-            cursor: zoom-in;
-            transition: max-width 0.1s ease, max-height 0.1s ease;
-        }
-
-        /* This special class is activated via JavaScript on click */
-        img.full-size {
-            max-width: none !important;
-            max-height: none !important;
-            width: 3840px !important;  /* Force the raw, literal 4K asset scale */
-            height: 2160px !important;
-            cursor: zoom-out; /* Changes cursor to a zoom-out glass */
+            border-radius: 0;
         }
     </style>
 </head>
@@ -52,16 +32,29 @@
 
     <script>
         const camImage = document.getElementById('weather-cam');
-        
+
         // 1. Force the browser to discard cached images on page refresh
         const uniqueTimestamp = new Date().getTime();
         camImage.src = 'current.jpg?t=' + uniqueTimestamp;
 
-        // 2. Desktop Click-to-Zoom Handler
-        camImage.addEventListener('click', function() {
-            // Toggles the .full-size class on and off with each normal mouse click
-            this.classList.toggle('full-size');
-        });
+        // 2. Intelligent Scaling Setup (Runs Once on Page Load)
+        camImage.onload = function() {
+            // Check the available height of the user's browser window, accounting for our 30px padding
+            const availableHeight = window.innerHeight - 30;
+            
+            // Calculate what percentage of the screen height the 4K image needs to scale to to fit perfectly
+            const scalePercentage = (availableHeight / 2160) * 100;
+
+            if (scalePercentage < 100) {
+                // Shrink the image to fit your screen initially using a fluid style percentage
+                this.style.width = (3840 * (scalePercentage / 100)) + 'px';
+                this.style.height = 'auto';
+            } else {
+                // If the monitor is larger than 4K, display it at raw size
+                this.style.width = '3840px';
+                this.style.height = '2160px';
+            }
+        };
     </script>
 
 </body>
