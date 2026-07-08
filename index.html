@@ -9,40 +9,37 @@
 
         body {
             background-color: #0f172a;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            align-items: center; 
-            min-height: 100vh;
-            /* Exactly 15px spacing from the top browser edge */
-            padding: 15px 10px 15px 10px;
-            overflow: auto; /* Scrollbars appear cleanly when you zoom in */
-        }
-
-        /* The Frame Container restricts initial layout heights without locking the actual image element */
-        .cam-frame {
-            width: 100%;
-            /* 16:9 aspect ratio prevents the image from creating vertical scrollbars on load */
-            max-width: calc((100vh - 30px) * (16 / 9)); 
+            /* No flexbox centering! This prevents Chrome from crushing the image layout at 500% zoom */
+            padding-top: 15px;
+            padding-left: 10px;
+            padding-right: 10px;
+            overflow: auto;
         }
 
         img {
             display: block;
+            /* Centers the block element using standard page margins instead of a flex grid */
+            margin-left: auto;
+            margin-right: auto;
+            
+            /* Initial fit: Scales to fit your screen width on load */
             width: 100%;
             height: auto;
-            border-radius: 0; /* Sharp, square edges */
+            
+            /* Limits the width so it doesn't spill over your monitor's height on initial load */
+            max-width: calc((100vh - 30px) * (16 / 9));
+            
+            border-radius: 0;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
         }
     </style>
 </head>
 <body>
 
-    <div class="cam-frame">
-        <img id="weather-cam" alt="Live Weather Snapshot">
-    </div>
+    <img id="weather-cam" alt="Live Weather Snapshot">
 
     <script>
-        // Forces Chrome to drop the old cached image every time the page refreshes
+        // Forces Chrome to bypass its cache on every page refresh
         const camImage = document.getElementById('weather-cam');
         const uniqueTimestamp = new Date().getTime();
         camImage.src = 'current.jpg?t=' + uniqueTimestamp;
