@@ -4,25 +4,25 @@
 # CONFIGURATION
 # ==========================================
 CAM_URL="http://camera.ip/cgi-bin/api.cgi?cmd=Snap&channel=0&rs=1&user=xxx&password=xxx&width=3840&height=2160"
-REPO_DIR="/root/weathercam" 
+REPO_DIR="/root/weathercam"
 
 # Set what you want displayed on GitHub here:
 DISPLAY_NAME="Weather Cam Bot"
 DISPLAY_EMAIL="weathercam@local.lan"
 # ==========================================
 
-# 1. Pull the crisp image straight into your folder
-curl -s -o "$REPO_DIR/current.jpg" "$CAM_URL"
+# 1. First, make sure the repository folder is clean and perfectly synced with GitHub
+cd "$REPO_DIR" || exit
+git reset --hard HEAD >/dev/null 2>&1
+git pull --rebase origin main
 
-# 2. Grab the rapid broadcast from the WS2910 on port 8123 using a bidirectional pipe
-# Create a temporary pipe file for the network handshake
+# 2. Pull the crisp image straight into a TEMPORARY file outside of the repo
+curl -s -o /tmp/raw_snap.jpg "$CAM_URL"
+
+# 3. Grab the rapid broadcast from the WS2910 on port 8123 using a bidirectional pipe
 rm -f /tmp/wpipe
 mkfifo /tmp/wpipe
-
-# Listen on port 8123, catch the data, and send the HTTP response back down the pipe
 RAW_DATA=$(cat /tmp/wpipe | timeout 35 /usr/bin/nc -l -p 8123 2>/dev/null & echo "HTTP/1.1 200 OK\r\nContent-Length: 0\r\nConnection: close\r\n\r\n" > /tmp/wpipe)
-
-# Clean up the pipe file immediately
 rm -f /tmp/wpipe
 
 # Filter out the raw metrics
@@ -33,12 +33,25 @@ WIND=$(echo "$RAW_DATA" | grep -o 'windspeedmph=[0-9.]*' | cut -d'=' -f2)
 # Convert Fahrenheit to Celsius securely using awk math
 if [ -n "$TEMPF" ]; then
     TEMPC=$(echo "$TEMPF" | awk '{print sprintf("%.1f", ($1 - 32) * 5 / 9)}')
-    METRICS="Temp: ${TEMPC}°C | Humidity: ${HUMIDITY}% | Wind: ${WIND} mph"
+    METRICS="Temp: ${TEMPC}°C  |  Humidity: ${HUMIDITY}%  |  Wind: ${WIND} mph"
 else
     METRICS="Weather Data Syncing..."
 fi
 
-# 3. Write out the index.html template layout
+# 4. Superimpose text onto the bottom edge of the image (-gravity South)
+if [ -f /tmp/raw_snap.jpg ]; then
+    convert /tmp/raw_snap.jpg \
+      -font "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf" -pointsize 48 \
+      -gravity North \
+      -stroke "#000000" -strokewidth 3 -annotate +0+20 "$METRICS" \
+      -stroke none      -fill "#ffffff" -annotate +0+20 "$METRICS" \
+      "$REPO_DIR/current.jpg"
+
+    # Clean up the temp file
+    rm -f /tmp/raw_snap.jpg
+fi
+
+# 5. Write out the index.html template layout using the identical $METRICS string
 cat << EOF > "$REPO_DIR/index.html"
 <!DOCTYPE html>
 <html lang="en">
@@ -46,6 +59,11 @@ cat << EOF > "$REPO_DIR/index.html"
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Live Weather Cam</title>
+    
+    <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="pragma" content="no-cache">
+    <meta http-equiv="expires" content="0">
+
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -63,31 +81,28 @@ cat << EOF > "$REPO_DIR/index.html"
         .banner {
             margin-top: 15px;
             color: #cbd5e1;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
         }
     </style>
 </head>
 <body>
-    <img src="current.jpg" alt="Live Weather Snapshot">
+    <img id="weathercam" alt="Live Weather Snapshot">
     <div class="banner">${METRICS}</div>
+
+    <script>
+        // Shatter mobile cache engines by appending a live unique runtime timestamp 
+        document.getElementById('weathercam').src = 'current.jpg?t=' + new Date().getTime();
+    </script>
 </body>
 </html>
 EOF
 
-# 4. Native Git sync to the cloud with explicit identity overrides
-cd "$REPO_DIR" || exit
-
-# Inject the environment overrides so Git ignores the "root" system profile
+# 6. Push our newly overwritten, crisp files safely to the cloud
 export GIT_AUTHOR_NAME="$DISPLAY_NAME"
 export GIT_AUTHOR_EMAIL="$DISPLAY_EMAIL"
 export GIT_COMMITTER_NAME="$DISPLAY_NAME"
 export GIT_COMMITTER_EMAIL="$DISPLAY_EMAIL"
 
-# CRITICAL: Pull down any remote changes (like README edits) before trying to push
-git pull --rebase origin main
-
 git add current.jpg index.html
-git commit -m "Update weather cam image and local weather metrics"
-
-# Removed the silence flag temporarily so you can see errors if it fails manually
-git push origin main
+git commit -m "Update weather cam image with synchronized dual-layer weather metrics"
+git push origin main > /dev/null 2>&1
