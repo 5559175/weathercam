@@ -29,11 +29,15 @@ rm -f /tmp/wpipe
 TEMPF=$(echo "$RAW_DATA" | grep -o 'tempf=[0-9.]*' | cut -d'=' -f2)
 HUMIDITY=$(echo "$RAW_DATA" | grep -o 'humidity=[0-9]*' | cut -d'=' -f2)
 WIND=$(echo "$RAW_DATA" | grep -o 'windspeedmph=[0-9.]*' | cut -d'=' -f2)
+RAIN_RATE_IN=$(echo "$RAW_DATA" | grep -o 'rainratein=[0-9.]*' | cut -d'=' -f2)
+DAILY_RAIN_IN=$(echo "$RAW_DATA" | grep -o 'dailyrainin=[0-9.]*' | cut -d'=' -f2)
 
-# Convert Fahrenheit to Celsius securely using awk math
+# Convert Fahrenheit to Celsius and inches to mm securely using awk math
 if [ -n "$TEMPF" ]; then
     TEMPC=$(echo "$TEMPF" | awk '{print sprintf("%.1f", ($1 - 32) * 5 / 9)}')
-    METRICS="Temp: ${TEMPC}°C  |  Humidity: ${HUMIDITY}%  |  Wind: ${WIND} mph"
+    RAIN_MM=$(echo "$RAIN_RATE_IN" | awk '{print sprintf("%.1f", ($1 == "" ? 0 : $1 * 25.4))}')
+    DAILY_MM=$(echo "$DAILY_RAIN_IN" | awk '{print sprintf("%.1f", ($1 == "" ? 0 : $1 * 25.4))}')
+    METRICS="Temp: ${TEMPC}°C  |  Humidity: ${HUMIDITY}%  |  Wind: ${WIND} mph  |  Rain: ${RAIN_MM} mm/hr  |  Daily Rain: ${DAILY_MM} mm"
 else
     METRICS="Weather Data Syncing..."
 fi
@@ -43,8 +47,8 @@ if [ -f /tmp/raw_snap.jpg ]; then
     convert /tmp/raw_snap.jpg \
       -font "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf" -pointsize 48 \
       -gravity North \
-      -stroke "#000000" -strokewidth 3 -annotate +0+20 "$METRICS" \
-      -stroke none      -fill "#ffffff" -annotate +0+20 "$METRICS" \
+      -stroke "#000000" -strokewidth 3 -annotate +80+20 "$METRICS" \
+      -stroke none      -fill "#ffffff" -annotate +80+20 "$METRICS" \
       "$REPO_DIR/current.jpg"
 
     # Clean up the temp file
