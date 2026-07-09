@@ -7,6 +7,6 @@ Gemini-coded script and index.html which:
 - Also displays the same metrics in HTML under the image for ease of reading on mobile devices.
 - Auto-pushes to GitHub (to serve via Pages to permit easy sharing elsewhere).
 
-Requires imagemagick, netcat, curl and git.
+Requires imagemagick, fonts-liberation, netcat, curl and git.
 
 Script can be run on a cron schedule to update the image and weather data periodically.
