@@ -21,6 +21,12 @@
     </style>
 </head>
 <body>
-    <img src="current.jpg" alt="Live Weather Snapshot">
+    <img id="weathercam" alt="Live Weather Snapshot">
+
+    <script>
+        // Force a unique timestamp query parameter onto the image URL on page load
+        // This instantly shatters aggressive mobile browser caches
+        document.getElementById('weathercam').src = 'current.jpg?t=' + new Date().getTime();
+    </script>
 </body>
 </html>
