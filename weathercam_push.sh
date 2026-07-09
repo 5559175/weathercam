@@ -38,7 +38,7 @@ else
     METRICS="Weather Data Syncing..."
 fi
 
-# 4. Superimpose text onto the bottom edge of the image (-gravity South)
+# 4. Superimpose text onto the top of the image (-gravity North)
 if [ -f /tmp/raw_snap.jpg ]; then
     convert /tmp/raw_snap.jpg \
       -font "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf" -pointsize 48 \
